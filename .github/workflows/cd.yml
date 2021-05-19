@@ -3,7 +3,7 @@ name: Continuos Deployment workflow
 on:
   push:
     branches:
-      - master      
+      - master
 env:
   HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
   IMAGE_NAME: registry.heroku.com/${{secrets.HEROKU_APP_NAME}}/web
@@ -14,12 +14,18 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+      - name: Clone front repository
+        uses: actions/checkout@v2
+        with:
+          repository: SalvaRodrgzDev/Lemoncode-Module7-Heroku
+          path: ./front
+          ssh-key: ${{secrets.SSH_PRIVATE_KEY}}
       - name: Install heroku
         run: curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
       - name: Login heroku
         run: heroku container:login
       - name: Build
-        run: docker build -t ${{env.IMAGE_NAME}} .
+        run: docker build -t ${{env.IMAGE_NAME}} --build-arg BASE_API_URL=${{secrets.BASE_API_URL}} .
       - name: Push image
         run: docker push ${{env.IMAGE_NAME}}
       - name: Release
